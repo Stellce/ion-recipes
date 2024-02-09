@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import {ActivatedRoute} from "@angular/router";
-import {RecipesService} from "../../recipes.service";
+import {ActivatedRoute, Router} from "@angular/router";
+import {RecipesService} from "../recipes.service";
 import {Recipe} from "../recipe.model";
+import {Subscription} from "rxjs";
 
 @Component({
   selector: 'app-recipe-detail',
@@ -10,21 +11,32 @@ import {Recipe} from "../recipe.model";
 })
 export class RecipeDetailPage implements OnInit {
   loadedRecipe: Recipe;
+  alertButtons = [{
+    text: 'Cancel',
+    role: 'cancel',
+    handler: () => {}
+  }, {
+    text: 'Delete',
+    handler: () => {
+      this.recipesService.deleteRecipe(this.loadedRecipe.id);
+      this.router.navigate(['/recipes']);
+    }
+  }];
+
+  recipeSub: Subscription;
 
   constructor(
     private activatedRoute: ActivatedRoute,
-    private recipesService: RecipesService
+    private recipesService: RecipesService,
+    private router: Router
   ) { }
 
   ngOnInit() {
+    this.recipeSub = this.recipesService.getRecipeListener().subscribe(recipe => this.loadedRecipe = recipe);
     this.activatedRoute.paramMap.subscribe(paramMap => {
-      if(!paramMap.has('recipeId')) {
-        // redirect
-        return;
-      }
       const recipeId = paramMap.get('recipeId');
       if(!recipeId) return;
-      this.loadedRecipe = this.recipesService.getRecipe(recipeId);
+      this.recipesService.getRecipe(recipeId);
     })
   }
 

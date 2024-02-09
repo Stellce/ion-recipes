@@ -6,6 +6,7 @@ import { RecipesPage } from './recipes.page';
 const routes: Routes = [
   {
     path: '',
+    pathMatch: 'full',
     component: RecipesPage
   },
   {
